@@ -20,4 +20,7 @@ public class PageEntry implements Comparable<PageEntry> {
     }
 
 
+    public static <U extends Comparable<? super U>, T> U getCount(T t) {
+        return null;
+    }
 }

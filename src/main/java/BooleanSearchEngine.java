@@ -7,6 +7,7 @@ import com.itextpdf.kernel.pdf.canvas.parser.PdfTextExtractor;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class BooleanSearchEngine implements SearchEngine {
 
@@ -46,13 +47,20 @@ public class BooleanSearchEngine implements SearchEngine {
                     freqs.put(word, freqs.getOrDefault(word, 0) + 1);
 
                 }
-                for (Map.Entry<String, Integer> entry : freqs.entrySet()) {
-                    List<PageEntry> listOFCurrentWord = new ArrayList<>();
+                List<PageEntry> pageEntryList = null;
+                for (var entry : freqs.entrySet()) {
                     if (index.containsKey(entry.getKey())) {
-                        listOFCurrentWord = index.get(entry.getKey());
+                        pageEntryList = index.get(entry.getKey());
+                        if (pageEntryList == null)
+                            pageEntryList = new ArrayList<>();
+                        pageEntryList.add(new PageEntry(pdfFile.getName(), i, freqs.get(entry.getKey())));
+                    } else {
+                        pageEntryList = new ArrayList<>();
+                        pageEntryList.add(new PageEntry(pdfFile.getName(), i, freqs.get(entry.getKey())));
                     }
-                    listOFCurrentWord.add(new PageEntry(pdfFile.getName(), i, entry.getValue()));
-                    index.put(entry.getKey(), listOFCurrentWord);
+                    index.put(entry.getKey(), pageEntryList.stream()
+                            .sorted(Comparator.comparing(PageEntry::getCount).reversed())
+                            .collect(Collectors.toList()));
                 }
             }
         }
